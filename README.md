@@ -12,7 +12,7 @@
     yarn
     yarn start
 
-## 2. 내 브라우저의 [chrome://extensions](chrome://extensions/) 실행
+## 2. 내 브라우저의 [chrome://extensions](chrome://extensions/) 실행 및 /dist 폴더 익스텐션에 적용
 
 ## TODO
 
