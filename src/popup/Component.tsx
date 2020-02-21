@@ -1,12 +1,21 @@
+/** @jsx jsx */
 import React from "react";
-import { ThemeProvider } from "emotion-theming";
-
+import { useTheme } from "emotion-theming";
+import { css, jsx } from "@emotion/core";
 function Wrapper(props) {
     return <div {...props}></div>;
 }
 
 function Item(props) {
-    return <div {...props}></div>;
+    const theme = useTheme();
+    return (
+        <div
+            {...props}
+            css={{
+                color: theme.colors.primary,
+            }}
+        ></div>
+    );
 }
 
 export { Item };
