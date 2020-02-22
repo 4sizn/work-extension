@@ -7,8 +7,10 @@ import { ThemeProvider } from "emotion-theming";
 const theme = {
     colors: {
         primary: "hotpink",
+        secondary: "black",
     },
 };
+
 export function Popup() {
     const [objects, setObjects] = React.useState([]);
     const [filterdObjects, setFilterdObjects] = React.useState([]);
@@ -34,7 +36,23 @@ export function Popup() {
             ? [].concat(...b.children.map(flatChildren))
             : b;
 
+    var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+    var oneWeekAgo = new Date().getTime() - microsecondsPerWeek;
     React.useEffect(() => {
+        // history
+        // chrome.history.search(
+        //     {
+        //         text: "",
+        //     },
+        //     historyItems => {
+        //         if (historyItems.length) {
+        //             setObjects(historyItems);
+        //             setFilterdObjects(historyItems);
+        //         }
+        //     },
+        //     );
+
+        //bookmark
         chrome.bookmarks.getTree(tree => {
             setObjects(flatChildren(tree[0]));
             setFilterdObjects(flatChildren(tree[0]));
