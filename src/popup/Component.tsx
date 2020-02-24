@@ -12,7 +12,8 @@ function Item(props) {
         <div
             {...props}
             css={{
-                color: theme.colors.primary,
+                fontSize: "24px",
+                color: "#000000E5",
             }}
         ></div>
     );

@@ -3,6 +3,7 @@ import * as React from "react";
 import { Item } from "./Component";
 import { Global, jsx } from "@emotion/core";
 import { ThemeProvider } from "emotion-theming";
+import useKeyPress from "./useKeypress";
 
 const theme = {
     colors: {
@@ -16,6 +17,13 @@ export function Popup() {
     const [filterdObjects, setFilterdObjects] = React.useState([]);
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef(null);
+    const downPress = useKeyPress("ArrowDown");
+    const upPress = useKeyPress("ArrowUp");
+    const enterPress = useKeyPress("Enter");
+
+    React.useEffect(() => {}, [downPress]);
+    React.useEffect(() => {}, [upPress]);
+    React.useEffect(() => {}, [enterPress]);
 
     const handleInputChange = e => {
         setTyped(true);
@@ -65,13 +73,25 @@ export function Popup() {
 
     return (
         <ThemeProvider theme={theme}>
-            <div>
+            <div
+                css={{
+                    backgroundColor: "#FFFFFF",
+                    border: "8px solid #0000007F",
+                    width: "559px",
+                }}
+            >
                 <input
                     type="text"
                     ref={inputEl}
                     onChange={handleInputChange}
                     css={{
+                        backgroundColor: "#CBCBCBF3",
                         width: "100%",
+                        boxSizing: "border-box",
+                        fontSize: "38px",
+                        border: "none",
+                        padding: "0 8px",
+                        color: "#000000FF",
                     }}
                 ></input>
                 {filterdObjects.length > 0 ? (
