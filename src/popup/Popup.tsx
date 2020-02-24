@@ -17,13 +17,33 @@ export function Popup() {
     const [filterdObjects, setFilterdObjects] = React.useState([]);
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef(null);
+
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
     const enterPress = useKeyPress("Enter");
+    const [cursor, setCursor] = React.useState(0);
 
-    React.useEffect(() => {}, [downPress]);
-    React.useEffect(() => {}, [upPress]);
-    React.useEffect(() => {}, [enterPress]);
+    React.useEffect(() => {
+        if (downPress) {
+            setCursor(prevState =>
+                prevState < objects.length - 1 ? prevState + 1 : 0,
+            );
+        }
+    }, [downPress]);
+
+    React.useEffect(() => {
+        if (upPress) {
+            setCursor(prevState =>
+                prevState > 0 ? prevState - 1 : objects.length,
+            );
+        }
+    }, [upPress]);
+
+    React.useEffect(() => {
+        inputEl.current.value = objects[cursor]?.title;
+    }, [cursor]);
+
+    // React.useEffect(() => {}, [enterPress]);
 
     const handleInputChange = e => {
         setTyped(true);
@@ -80,6 +100,7 @@ export function Popup() {
                     width: "559px",
                 }}
             >
+                <div>cursor : {cursor}</div>
                 <input
                     type="text"
                     ref={inputEl}
@@ -94,18 +115,26 @@ export function Popup() {
                         color: "#000000FF",
                     }}
                 ></input>
-                {filterdObjects.length > 0 ? (
-                    filterdObjects.map(item => (
-                        <Item
-                            key={item.id}
-                            // onClick={() => chrome.tabs.update({ url: item.url })}
-                        >
-                            {item.title}
-                        </Item>
-                    ))
-                ) : (
-                    <Item>NOT FOUND</Item>
-                )}
+                <div
+                    css={{
+                        maxHeight: "500px",
+                        overflowY: "auto",
+                    }}
+                >
+                    {filterdObjects.length > 0 ? (
+                        filterdObjects.map((item, i) => (
+                            <Item
+                                key={item.id}
+                                active={i === cursor}
+                                // onClick={() => chrome.tabs.update({ url: item.url })}
+                            >
+                                {item.title}
+                            </Item>
+                        ))
+                    ) : (
+                        <Item>NOT FOUND</Item>
+                    )}
+                </div>
             </div>
         </ThemeProvider>
     );
