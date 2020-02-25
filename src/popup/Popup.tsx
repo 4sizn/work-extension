@@ -1,8 +1,9 @@
 /** @jsx jsx */
 import * as React from "react";
 import { Item } from "./Component";
-import { Global, jsx } from "@emotion/core";
+import { Global, jsx, css } from "@emotion/core";
 import { ThemeProvider } from "emotion-theming";
+// @ts-ignore
 import useKeyPress from "./useKeypress";
 
 const theme = {
@@ -24,6 +25,9 @@ export function Popup() {
     const [cursor, setCursor] = React.useState(0);
 
     React.useEffect(() => {
+        console.log("asdf", inputEl.current);
+    }, [inputEl]);
+    React.useEffect(() => {
         if (downPress) {
             setCursor(prevState =>
                 prevState < objects.length - 1 ? prevState + 1 : 0,
@@ -40,8 +44,10 @@ export function Popup() {
     }, [upPress]);
 
     React.useEffect(() => {
-        inputEl.current.value = objects[cursor]?.title;
-    }, [cursor]);
+        if (enterPress) {
+            chrome.tabs.update({ url: objects[cursor].url });
+        }
+    }, [enterPress]);
 
     // React.useEffect(() => {}, [enterPress]);
 
@@ -100,25 +106,32 @@ export function Popup() {
                     width: "559px",
                 }}
             >
-                <div>cursor : {cursor}</div>
-                <input
-                    type="text"
-                    ref={inputEl}
-                    onChange={handleInputChange}
-                    css={{
-                        backgroundColor: "#CBCBCBF3",
-                        width: "100%",
-                        boxSizing: "border-box",
-                        fontSize: "38px",
-                        border: "none",
-                        padding: "0 8px",
-                        color: "#000000FF",
-                    }}
-                ></input>
+                <div
+                    css={css`
+                        margin: 8px 8px;
+                    `}
+                >
+                    <input
+                        type="text"
+                        ref={inputEl}
+                        value={objects[cursor]?.title || ""}
+                        onChange={handleInputChange}
+                        css={{
+                            backgroundColor: "#CBCBCBF3",
+                            width: "100%",
+                            boxSizing: "border-box",
+                            fontSize: "38px",
+                            border: "none",
+                            padding: "0 8px",
+                            color: "#000000FF",
+                        }}
+                    ></input>
+                </div>
                 <div
                     css={{
-                        maxHeight: "500px",
+                        maxHeight: "400px",
                         overflowY: "auto",
+                        margin: "8px 8px",
                     }}
                 >
                     {filterdObjects.length > 0 ? (
