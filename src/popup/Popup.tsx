@@ -5,6 +5,7 @@ import { Global, jsx, css } from "@emotion/core";
 import { ThemeProvider } from "emotion-theming";
 // @ts-ignore
 import useKeyPress from "./useKeypress";
+import "./control";
 
 const theme = {
     colors: {
@@ -24,9 +25,6 @@ export function Popup() {
     const enterPress = useKeyPress("Enter");
     const [cursor, setCursor] = React.useState(0);
 
-    React.useEffect(() => {
-        console.log("asdf", inputEl.current);
-    }, [inputEl]);
     React.useEffect(() => {
         if (downPress) {
             setCursor(prevState =>
@@ -49,13 +47,17 @@ export function Popup() {
         }
     }, [enterPress]);
 
+    React.useEffect(() => {
+        inputEl.current.focus();
+    }, [cursor]);
+
     // React.useEffect(() => {}, [enterPress]);
 
     const handleInputChange = e => {
         setTyped(true);
         setFilterdObjects(
             objects.filter(o => {
-                return o.title.includes(e.target.value);
+                return o.title.toLowerCase().includes(e.target.value);
             }),
         );
     };
@@ -114,7 +116,6 @@ export function Popup() {
                     <input
                         type="text"
                         ref={inputEl}
-                        value={objects[cursor]?.title || ""}
                         onChange={handleInputChange}
                         css={{
                             backgroundColor: "#CBCBCBF3",

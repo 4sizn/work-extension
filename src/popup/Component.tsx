@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useTheme } from "emotion-theming";
 import { css, jsx } from "@emotion/core";
 
@@ -9,8 +9,15 @@ function Wrapper(props) {
 
 function Item({ active, ...rest }) {
     const theme = useTheme();
+    const targetEl = useRef(null);
+
+    useEffect(() => {
+        console.log("active", active);
+        active && targetEl.current.focus();
+    }, [active]);
     return (
         <div
+            ref={targetEl}
             css={css`
                 font-size: 24px;
                 line-height: 1.5;

@@ -5,14 +5,12 @@ const useKeyPress = function(targetKey) {
 
     function downHandler({ key }) {
         if (key === targetKey) {
-            console.log("press");
             setKeyPressed(true);
         }
     }
 
     const upHandler = ({ key }) => {
         if (key === targetKey) {
-            console.log("up");
             setKeyPressed(false);
         }
     };
