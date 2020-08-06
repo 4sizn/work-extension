@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import * as React from "react";
 import { Item } from "./Component";
-import { Global, jsx, css } from "@emotion/core";
+import { jsx, css } from "@emotion/core";
 import { ThemeProvider } from "emotion-theming";
 // @ts-ignore
 import useKeyPress from "./useKeypress";
@@ -14,11 +14,17 @@ const theme = {
     },
 };
 
+type Object = {
+    [key: string]: any;
+    url?: string;
+    title?: string | undefined;
+};
+
 export function Popup() {
-    const [objects, setObjects] = React.useState([]);
-    const [filterdObjects, setFilterdObjects] = React.useState([]);
+    const [objects, setObjects] = React.useState<Object[]>([]);
+    const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
     const [isTyped, setTyped] = React.useState(false);
-    const inputEl = React.useRef(null);
+    const inputEl = React.useRef<HTMLInputElement>(null);
 
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
@@ -27,7 +33,7 @@ export function Popup() {
 
     React.useEffect(() => {
         if (downPress) {
-            setCursor(prevState =>
+            setCursor((prevState) =>
                 prevState < objects.length - 1 ? prevState + 1 : 0,
             );
         }
@@ -35,7 +41,7 @@ export function Popup() {
 
     React.useEffect(() => {
         if (upPress) {
-            setCursor(prevState =>
+            setCursor((prevState) =>
                 prevState > 0 ? prevState - 1 : objects.length,
             );
         }
@@ -48,16 +54,16 @@ export function Popup() {
     }, [enterPress]);
 
     React.useEffect(() => {
-        inputEl.current.focus();
+        inputEl!.current!.focus();
     }, [cursor]);
 
     // React.useEffect(() => {}, [enterPress]);
 
-    const handleInputChange = e => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
         setFilterdObjects(
-            objects.filter(o => {
-                return o.title.toLowerCase().includes(e.target.value);
+            objects.filter((o) => {
+                return o.title?.toLowerCase().includes(e.target.value);
             }),
         );
     };
@@ -67,7 +73,7 @@ export function Popup() {
     }, []);
 
     //flatten all children nodes
-    const flatChildren = b =>
+    const flatChildren = (b: any) =>
         Array.isArray(b.children)
             ? [].concat(...b.children.map(flatChildren))
             : b;
@@ -89,7 +95,7 @@ export function Popup() {
         //     );
 
         //bookmark
-        chrome.bookmarks.getTree(tree => {
+        chrome.bookmarks.getTree((tree) => {
             setObjects(flatChildren(tree[0]));
             setFilterdObjects(flatChildren(tree[0]));
         });
@@ -146,7 +152,7 @@ export function Popup() {
                             </Item>
                         ))
                     ) : (
-                        <Item>NOT FOUND</Item>
+                        <Item active={false}>NOT FOUND</Item>
                     )}
                 </div>
             </div>

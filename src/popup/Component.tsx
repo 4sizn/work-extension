@@ -3,17 +3,19 @@ import React, { useRef, useEffect } from "react";
 import { useTheme } from "emotion-theming";
 import { css, jsx } from "@emotion/core";
 
-function Wrapper(props) {
-    return <div {...props}></div>;
-}
-
-function Item({ active, ...rest }) {
+type ItemProps = {
+    active: boolean;
+    children: any;
+};
+function Item({ active, ...rest }: ItemProps) {
     const theme = useTheme();
-    const targetEl = useRef(null);
+    const targetEl = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         console.log("active", active);
-        active && targetEl.current.focus();
+        if (active) {
+            targetEl!.current!.focus();
+        }
     }, [active]);
     return (
         <div
