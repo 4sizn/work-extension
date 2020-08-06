@@ -23,19 +23,34 @@ type Object = {
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
+    let refs: any = null;
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
-
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
     const enterPress = useKeyPress("Enter");
+    const scrollToRef = (ref: any) => window.scrollTo(0, ref.current.offsetTop);
     const [cursor, setCursor] = React.useState(0);
 
     React.useEffect(() => {
+        refs = filterdObjects.reduce((acc, value, idx) => {
+            acc[idx] = React.createRef();
+            return acc;
+        }, {});
+        console.log("refs", refs);
+    }, [filterdObjects]);
+
+    React.useEffect(() => {
         if (downPress) {
-            setCursor((prevState) =>
-                prevState < objects.length - 1 ? prevState + 1 : 0,
-            );
+            let _cursor: number;
+            setCursor((prevState) => {
+                _cursor = prevState < objects.length - 1 ? prevState + 1 : 0;
+                // refs[_cursor].current.scrollIntoView({
+                //     behavior: "smooth",
+                //     block: "start",
+                // });
+                return _cursor;
+            });
         }
     }, [downPress]);
 
@@ -57,7 +72,9 @@ export function Popup() {
         inputEl!.current!.focus();
     }, [cursor]);
 
-    // React.useEffect(() => {}, [enterPress]);
+    React.useEffect(() => {
+        chrome.runtime.sendMessage({ popupMounted: true });
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
@@ -68,10 +85,6 @@ export function Popup() {
         );
     };
 
-    React.useEffect(() => {
-        chrome.runtime.sendMessage({ popupMounted: true });
-    }, []);
-
     //flatten all children nodes
     const flatChildren = (b: any) =>
         Array.isArray(b.children)
@@ -81,29 +94,12 @@ export function Popup() {
     var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = new Date().getTime() - microsecondsPerWeek;
     React.useEffect(() => {
-        // history
-        // chrome.history.search(
-        //     {
-        //         text: "",
-        //     },
-        //     historyItems => {
-        //         if (historyItems.length) {
-        //             setObjects(historyItems);
-        //             setFilterdObjects(historyItems);
-        //         }
-        //     },
-        //     );
-
         //bookmark
         chrome.bookmarks.getTree((tree) => {
             setObjects(flatChildren(tree[0]));
             setFilterdObjects(flatChildren(tree[0]));
         });
     }, []);
-
-    React.useEffect(() => {
-        console.log(filterdObjects, "filterdObjects");
-    }, [filterdObjects]);
 
     return (
         <ThemeProvider theme={theme}>
@@ -142,15 +138,23 @@ export function Popup() {
                     }}
                 >
                     {filterdObjects.length > 0 ? (
-                        filterdObjects.map((item, i) => (
-                            <Item
-                                key={item.id}
-                                active={i === cursor}
-                                // onClick={() => chrome.tabs.update({ url: item.url })}
-                            >
-                                {item.title}
-                            </Item>
-                        ))
+                        filterdObjects.map((item, i) => {
+                            return (
+                                <Item
+                                    key={item.id}
+                                    ref={refs?.[i]}
+                                    active={i === cursor}
+                                    onMouseOver={() => {
+                                        setCursor(i);
+                                    }}
+                                    onClick={() =>
+                                        chrome.tabs.update({ url: item.url })
+                                    }
+                                >
+                                    {item.title}
+                                </Item>
+                            );
+                        })
                     ) : (
                         <Item active={false}>NOT FOUND</Item>
                     )}
