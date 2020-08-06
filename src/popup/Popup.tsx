@@ -23,32 +23,28 @@ type Object = {
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
-    let refs: any = null;
+    let refs: any = React.useRef([]);
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
     const enterPress = useKeyPress("Enter");
-    const scrollToRef = (ref: any) => window.scrollTo(0, ref.current.offsetTop);
     const [cursor, setCursor] = React.useState(0);
 
     React.useEffect(() => {
-        refs = filterdObjects.reduce((acc, value, idx) => {
-            acc[idx] = React.createRef();
-            return acc;
-        }, {});
-        console.log("refs", refs);
-    }, [filterdObjects]);
+        updateReference(filterdObjects.length);
+    }, [filterdObjects.length]);
 
     React.useEffect(() => {
         if (downPress) {
             let _cursor: number;
             setCursor((prevState) => {
-                _cursor = prevState < objects.length - 1 ? prevState + 1 : 0;
-                // refs[_cursor].current.scrollIntoView({
-                //     behavior: "smooth",
-                //     block: "start",
-                // });
+                _cursor =
+                    prevState < filterdObjects.length - 1 ? prevState + 1 : 0;
+                refs.current[_cursor].current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                });
                 return _cursor;
             });
         }
@@ -56,9 +52,16 @@ export function Popup() {
 
     React.useEffect(() => {
         if (upPress) {
-            setCursor((prevState) =>
-                prevState > 0 ? prevState - 1 : objects.length,
-            );
+            let _cursor: number;
+            setCursor((prevState) => {
+                _cursor =
+                    prevState > 0 ? prevState - 1 : filterdObjects.length - 1;
+                refs.current[_cursor].current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                });
+                return _cursor;
+            });
         }
     }, [upPress]);
 
@@ -75,6 +78,16 @@ export function Popup() {
     React.useEffect(() => {
         chrome.runtime.sendMessage({ popupMounted: true });
     }, []);
+
+    function updateReference(len: number) {
+        refs.current = refs.current.splice(0, len);
+        for (let i = 0; i < len; i++) {
+            refs.current[i] = refs.current[i] || React.createRef();
+        }
+        refs.current = refs.current.map(
+            (item: any) => item || React.createRef(),
+        );
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
@@ -142,7 +155,7 @@ export function Popup() {
                             return (
                                 <Item
                                     key={item.id}
-                                    ref={refs?.[i]}
+                                    ref={refs?.current[i]}
                                     active={i === cursor}
                                     onMouseOver={() => {
                                         setCursor(i);
