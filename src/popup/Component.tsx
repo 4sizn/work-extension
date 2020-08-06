@@ -1,6 +1,5 @@
 /** @jsx jsx */
-import React, { useRef, useEffect } from "react";
-import { useTheme } from "emotion-theming";
+import React from "react";
 import { css, jsx } from "@emotion/core";
 
 type ItemProps = {
@@ -12,15 +11,6 @@ type ItemProps = {
 
 const Item = React.forwardRef<HTMLDivElement, ItemProps>(
     ({ active, ...rest }, ref) => {
-        const theme = useTheme();
-        const targetEl = useRef<HTMLDivElement>(null);
-
-        // useEffect(() => {
-        //     console.log("active", active);
-        //     if (active) {
-        //         targetEl!.current!.focus();
-        //     }
-        // }, [active]);
         return (
             <div
                 ref={ref}
