@@ -4,7 +4,7 @@ import { css, jsx } from "@emotion/core";
 
 type ItemProps = {
     active: boolean;
-    children: any;
+    children: React.ReactNode;
     onClick?: () => void;
     onMouseOver?: () => void;
 };

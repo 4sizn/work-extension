@@ -20,11 +20,15 @@ type Object = {
     title?: string | undefined;
 };
 
+type Refs = {
+    current?: HTMLDivElement[] | any;
+};
+
 export function Popup() {
+    const [isTyped, setTyped] = React.useState(false);
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
-    let refs: any = React.useRef([]);
-    const [isTyped, setTyped] = React.useState(false);
+    let refs: Refs = React.useRef([]);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
@@ -41,8 +45,8 @@ export function Popup() {
             setCursor((prevState) => {
                 _cursor =
                     prevState < filterdObjects.length - 1 ? prevState + 1 : 0;
-                refs.current[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                refs.current![_cursor].current.scrollIntoView({
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -57,7 +61,7 @@ export function Popup() {
                 _cursor =
                     prevState > 0 ? prevState - 1 : filterdObjects.length - 1;
                 refs.current[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -71,6 +75,7 @@ export function Popup() {
         }
     }, [enterPress]);
 
+    //항상 입력란 포커싱
     React.useEffect(() => {
         inputEl!.current!.focus();
     }, [cursor]);
@@ -79,11 +84,14 @@ export function Popup() {
         chrome.runtime.sendMessage({ popupMounted: true });
     }, []);
 
+    //https://stackoverflow.com/questions/54940399/how-target-dom-with-react-useref-in-map/55105849
     function updateReference(len: number) {
         refs.current = refs.current.splice(0, len);
+
         for (let i = 0; i < len; i++) {
             refs.current[i] = refs.current[i] || React.createRef();
         }
+
         refs.current = refs.current.map(
             (item: any) => item || React.createRef(),
         );
@@ -92,9 +100,9 @@ export function Popup() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
         setFilterdObjects(
-            objects.filter((o) => {
-                return o.title?.toLowerCase().includes(e.target.value);
-            }),
+            objects.filter((o) =>
+                o.title?.toLowerCase().includes(e.target.value),
+            ),
         );
     };
 
