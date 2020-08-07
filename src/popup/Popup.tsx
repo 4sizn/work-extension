@@ -17,7 +17,7 @@ const theme = {
 type Object = {
     [key: string]: any;
     url?: string;
-    title?: string | undefined;
+    title?: string;
 };
 
 let refs: any = [];
@@ -51,7 +51,7 @@ export function Popup() {
                 _cursor =
                     prevState < filterdObjects.length - 1 ? prevState + 1 : 0;
                 refs[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -66,7 +66,7 @@ export function Popup() {
                 _cursor =
                     prevState > 0 ? prevState - 1 : filterdObjects.length - 1;
                 refs[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -81,22 +81,21 @@ export function Popup() {
     }, [enterPress]);
 
     React.useEffect(() => {
-        inputEl!.current!.focus();
+        inputEl.current!.focus();
     }, [cursor]);
 
     React.useEffect(() => {
         chrome.runtime.sendMessage({ popupMounted: true });
     }, []);
 
-    function updateReference(len: number) {
+    const updateReference = (len: number) => {
         refs = refs.splice(0, len);
 
         for (let i = 0; i < len; i++) {
             refs[i] = refs[i] || React.createRef();
         }
-
-        refs = refs.map((item: any) => item || React.createRef());
-    }
+        // refs = refs.map((item: any) => item || React.createRef());
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
@@ -108,7 +107,7 @@ export function Popup() {
     };
 
     //flatten all children nodes
-    const flatChildren = (b: any) =>
+    const flatChildren = (b: chrome.bookmarks.BookmarkTreeNode): any =>
         Array.isArray(b.children)
             ? [].concat(...b.children.map(flatChildren))
             : b;
