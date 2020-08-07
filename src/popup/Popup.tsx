@@ -20,10 +20,11 @@ type Object = {
     title?: string | undefined;
 };
 
+let refs: any = [];
+
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
-    let refs: any = React.useRef([]);
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
@@ -41,7 +42,7 @@ export function Popup() {
             setCursor((prevState) => {
                 _cursor =
                     prevState < filterdObjects.length - 1 ? prevState + 1 : 0;
-                refs.current[_cursor].current.scrollIntoView({
+                refs[_cursor].current.scrollIntoView({
                     behavior: "smooth",
                     block: "nearest",
                 });
@@ -56,7 +57,7 @@ export function Popup() {
             setCursor((prevState) => {
                 _cursor =
                     prevState > 0 ? prevState - 1 : filterdObjects.length - 1;
-                refs.current[_cursor].current.scrollIntoView({
+                refs[_cursor].current.scrollIntoView({
                     behavior: "smooth",
                     block: "nearest",
                 });
@@ -80,13 +81,13 @@ export function Popup() {
     }, []);
 
     function updateReference(len: number) {
-        refs.current = refs.current.splice(0, len);
+        refs = refs.splice(0, len);
+
         for (let i = 0; i < len; i++) {
-            refs.current[i] = refs.current[i] || React.createRef();
+            refs[i] = refs[i] || React.createRef();
         }
-        refs.current = refs.current.map(
-            (item: any) => item || React.createRef(),
-        );
+
+        refs = refs.map((item: any) => item || React.createRef());
     }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,7 +156,7 @@ export function Popup() {
                             return (
                                 <Item
                                     key={item.id}
-                                    ref={refs?.current[i]}
+                                    ref={refs[i]}
                                     active={i === cursor}
                                     onMouseOver={() => {
                                         setCursor(i);
