@@ -33,6 +33,14 @@ export function Popup() {
     const [cursor, setCursor] = React.useState(0);
 
     React.useEffect(() => {
+        //bookmark
+        chrome.bookmarks.getTree((tree) => {
+            setObjects(flatChildren(tree[0]));
+            setFilterdObjects(flatChildren(tree[0]));
+        });
+    }, []);
+
+    React.useEffect(() => {
         updateReference(filterdObjects.length);
     }, [filterdObjects.length]);
 
@@ -107,13 +115,6 @@ export function Popup() {
 
     var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = new Date().getTime() - microsecondsPerWeek;
-    React.useEffect(() => {
-        //bookmark
-        chrome.bookmarks.getTree((tree) => {
-            setObjects(flatChildren(tree[0]));
-            setFilterdObjects(flatChildren(tree[0]));
-        });
-    }, []);
 
     return (
         <ThemeProvider theme={theme}>
