@@ -17,19 +17,28 @@ const theme = {
 type Object = {
     [key: string]: any;
     url?: string;
-    title?: string | undefined;
+    title?: string;
 };
+
+let refs: any = [];
 
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
-    let refs: any = React.useRef([]);
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
     const enterPress = useKeyPress("Enter");
     const [cursor, setCursor] = React.useState(0);
+
+    React.useEffect(() => {
+        //bookmark
+        chrome.bookmarks.getTree((tree) => {
+            setObjects(flatChildren(tree[0]));
+            setFilterdObjects(flatChildren(tree[0]));
+        });
+    }, []);
 
     React.useEffect(() => {
         updateReference(filterdObjects.length);
@@ -41,8 +50,8 @@ export function Popup() {
             setCursor((prevState) => {
                 _cursor =
                     prevState < filterdObjects.length - 1 ? prevState + 1 : 0;
-                refs.current[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                refs[_cursor].current.scrollIntoView({
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -56,8 +65,8 @@ export function Popup() {
             setCursor((prevState) => {
                 _cursor =
                     prevState > 0 ? prevState - 1 : filterdObjects.length - 1;
-                refs.current[_cursor].current.scrollIntoView({
-                    behavior: "smooth",
+                refs[_cursor].current.scrollIntoView({
+                    behavior: "auto",
                     block: "nearest",
                 });
                 return _cursor;
@@ -72,22 +81,21 @@ export function Popup() {
     }, [enterPress]);
 
     React.useEffect(() => {
-        inputEl!.current!.focus();
+        inputEl.current!.focus();
     }, [cursor]);
 
     React.useEffect(() => {
         chrome.runtime.sendMessage({ popupMounted: true });
     }, []);
 
-    function updateReference(len: number) {
-        refs.current = refs.current.splice(0, len);
+    const updateReference = (len: number) => {
+        refs = refs.splice(0, len);
+
         for (let i = 0; i < len; i++) {
-            refs.current[i] = refs.current[i] || React.createRef();
+            refs[i] = refs[i] || React.createRef();
         }
-        refs.current = refs.current.map(
-            (item: any) => item || React.createRef(),
-        );
-    }
+        // refs = refs.map((item: any) => item || React.createRef());
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTyped(true);
@@ -99,20 +107,13 @@ export function Popup() {
     };
 
     //flatten all children nodes
-    const flatChildren = (b: any) =>
+    const flatChildren = (b: chrome.bookmarks.BookmarkTreeNode): any =>
         Array.isArray(b.children)
             ? [].concat(...b.children.map(flatChildren))
             : b;
 
     var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = new Date().getTime() - microsecondsPerWeek;
-    React.useEffect(() => {
-        //bookmark
-        chrome.bookmarks.getTree((tree) => {
-            setObjects(flatChildren(tree[0]));
-            setFilterdObjects(flatChildren(tree[0]));
-        });
-    }, []);
 
     return (
         <ThemeProvider theme={theme}>
@@ -155,7 +156,7 @@ export function Popup() {
                             return (
                                 <Item
                                     key={item.id}
-                                    ref={refs?.current[i]}
+                                    ref={refs[i]}
                                     active={i === cursor}
                                     onMouseOver={() => {
                                         setCursor(i);
