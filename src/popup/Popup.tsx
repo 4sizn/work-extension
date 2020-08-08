@@ -25,8 +25,7 @@ let refs: any = [];
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
-    const [command, setCommand] = React.useState<string>("ch");
-
+    const [keyword, setKeyword] = React.useState<string>("");
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
@@ -36,7 +35,7 @@ export function Popup() {
 
     React.useEffect(() => {
         //bookmark
-        switch (command) {
+        switch (keyword) {
             case "cb": {
                 chrome.bookmarks.getTree((tree) => {
                     setObjects(flatChildren(tree[0]));
@@ -62,7 +61,7 @@ export function Popup() {
                 break;
             }
         }
-    }, []);
+    }, [keyword]);
 
     React.useEffect(() => {
         updateReference(filterdObjects.length);
@@ -80,6 +79,7 @@ export function Popup() {
                 });
                 return _cursor;
             });
+            setTyped(false);
         }
     }, [downPress]);
 
@@ -95,12 +95,14 @@ export function Popup() {
                 });
                 return _cursor;
             });
+            setTyped(false);
         }
     }, [upPress]);
 
     React.useEffect(() => {
         if (enterPress) {
             chrome.tabs.update({ url: objects[cursor].url });
+            setTyped(false);
         }
     }, [enterPress]);
 
@@ -118,16 +120,24 @@ export function Popup() {
         for (let i = 0; i < len; i++) {
             refs[i] = refs[i] || React.createRef();
         }
-        // refs = refs.map((item: any) => item || React.createRef());
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let results: string[] = [];
+
         setTyped(true);
-        setFilterdObjects(
-            objects.filter((o) => {
-                return o.title?.toLowerCase().includes(e.target.value);
-            }),
-        );
+
+        if (e.target.value.length > 0) {
+            console.log(e.target.value);
+            results = e.target.value.split(" ");
+
+            setKeyword(results[0]);
+            setFilterdObjects(
+                objects.filter((o) =>
+                    o.title?.toLowerCase().includes(results[1]),
+                ),
+            );
+        }
     };
 
     //flatten all children nodes
