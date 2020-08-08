@@ -25,6 +25,8 @@ let refs: any = [];
 export function Popup() {
     const [objects, setObjects] = React.useState<Object[]>([]);
     const [filterdObjects, setFilterdObjects] = React.useState<Object[]>([]);
+    const [command, setCommand] = React.useState<string>("ch");
+
     const [isTyped, setTyped] = React.useState(false);
     const inputEl = React.useRef<HTMLInputElement>(null);
     const downPress = useKeyPress("ArrowDown");
@@ -34,10 +36,32 @@ export function Popup() {
 
     React.useEffect(() => {
         //bookmark
-        chrome.bookmarks.getTree((tree) => {
-            setObjects(flatChildren(tree[0]));
-            setFilterdObjects(flatChildren(tree[0]));
-        });
+        switch (command) {
+            case "cb": {
+                chrome.bookmarks.getTree((tree) => {
+                    setObjects(flatChildren(tree[0]));
+                    setFilterdObjects(flatChildren(tree[0]));
+                });
+                break;
+            }
+            case "ch": {
+                // history
+                chrome.history.search(
+                    {
+                        text: "",
+                    },
+                    (historyItems) => {
+                        if (historyItems.length) {
+                            setObjects(historyItems);
+                            setFilterdObjects(historyItems);
+                        }
+                    },
+                );
+            }
+            default: {
+                break;
+            }
+        }
     }, []);
 
     React.useEffect(() => {
